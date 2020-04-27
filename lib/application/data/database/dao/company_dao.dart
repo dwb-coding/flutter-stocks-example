@@ -17,7 +17,7 @@ class CompanyDao extends DatabaseAccessor<AppDatabase> with _$CompanyDaoMixin {
 
   // observe company list and update as necessary
   Stream<List<Company>> search(String symbol) =>
-      (db.select(companies)..where((company) => company.symbol.like('%symbol%')))
+      (db.select(companies)..where((company) => company.symbol.like('%$symbol%')))
       .watch();
 
 //  Future updateCompanies(List<Company> companies) {
