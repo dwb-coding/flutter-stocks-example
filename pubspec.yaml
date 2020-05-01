@@ -36,10 +36,12 @@ dependencies:
 
 dev_dependencies:
   moor_generator: ^2.4.0
-  build_runner: ^1.8.1
-  freezed: ^0.10.6
+  moor_ffi: ^0.4.0
+  build_runner: ^1.9.0
+  freezed: ^0.10.7
   json_serializable: ^3.3.0
   chopper_generator: ^3.0.4
+  test:
 
   flutter_test:
     sdk: flutter

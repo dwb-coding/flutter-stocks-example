@@ -1591,7 +1591,7 @@ class Company extends DataClass implements Insertable<Company> {
   final String symbol;
   final String name;
   final String iexId;
-  final String date;
+  final DateTime date;
   final String type;
   final String region;
   final String currency;
@@ -1605,8 +1605,8 @@ class Company extends DataClass implements Insertable<Company> {
       @required this.iexId,
       @required this.date,
       @required this.type,
-      @required this.region,
-      @required this.currency,
+      this.region,
+      this.currency,
       @required this.isEnabled,
       this.figi,
       this.cik});
@@ -1615,6 +1615,7 @@ class Company extends DataClass implements Insertable<Company> {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final boolType = db.typeSystem.forDartType<bool>();
     return Company(
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
@@ -1623,7 +1624,8 @@ class Company extends DataClass implements Insertable<Company> {
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       iexId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}iex_id']),
-      date: stringType.mapFromDatabaseResponse(data['${effectivePrefix}date']),
+      date:
+          dateTimeType.mapFromDatabaseResponse(data['${effectivePrefix}date']),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
       region:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}region']),
@@ -1643,7 +1645,7 @@ class Company extends DataClass implements Insertable<Company> {
       symbol: serializer.fromJson<String>(json['symbol']),
       name: serializer.fromJson<String>(json['name']),
       iexId: serializer.fromJson<String>(json['iexId']),
-      date: serializer.fromJson<String>(json['date']),
+      date: serializer.fromJson<DateTime>(json['date']),
       type: serializer.fromJson<String>(json['type']),
       region: serializer.fromJson<String>(json['region']),
       currency: serializer.fromJson<String>(json['currency']),
@@ -1660,7 +1662,7 @@ class Company extends DataClass implements Insertable<Company> {
       'symbol': serializer.toJson<String>(symbol),
       'name': serializer.toJson<String>(name),
       'iexId': serializer.toJson<String>(iexId),
-      'date': serializer.toJson<String>(date),
+      'date': serializer.toJson<DateTime>(date),
       'type': serializer.toJson<String>(type),
       'region': serializer.toJson<String>(region),
       'currency': serializer.toJson<String>(currency),
@@ -1699,7 +1701,7 @@ class Company extends DataClass implements Insertable<Company> {
           String symbol,
           String name,
           String iexId,
-          String date,
+          DateTime date,
           String type,
           String region,
           String currency,
@@ -1780,7 +1782,7 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
   final Value<String> symbol;
   final Value<String> name;
   final Value<String> iexId;
-  final Value<String> date;
+  final Value<DateTime> date;
   final Value<String> type;
   final Value<String> region;
   final Value<String> currency;
@@ -1805,10 +1807,10 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
     @required String symbol,
     @required String name,
     @required String iexId,
-    @required String date,
+    @required DateTime date,
     @required String type,
-    @required String region,
-    @required String currency,
+    this.region = const Value.absent(),
+    this.currency = const Value.absent(),
     @required bool isEnabled,
     this.figi = const Value.absent(),
     this.cik = const Value.absent(),
@@ -1817,15 +1819,13 @@ class CompaniesCompanion extends UpdateCompanion<Company> {
         iexId = Value(iexId),
         date = Value(date),
         type = Value(type),
-        region = Value(region),
-        currency = Value(currency),
         isEnabled = Value(isEnabled);
   CompaniesCompanion copyWith(
       {Value<int> id,
       Value<String> symbol,
       Value<String> name,
       Value<String> iexId,
-      Value<String> date,
+      Value<DateTime> date,
       Value<String> type,
       Value<String> region,
       Value<String> currency,
@@ -1890,12 +1890,15 @@ class $CompaniesTable extends Companies
   }
 
   final VerificationMeta _dateMeta = const VerificationMeta('date');
-  GeneratedTextColumn _date;
+  GeneratedDateTimeColumn _date;
   @override
-  GeneratedTextColumn get date => _date ??= _constructDate();
-  GeneratedTextColumn _constructDate() {
-    return GeneratedTextColumn('date', $tableName, false,
-        minTextLength: 1, maxTextLength: 20);
+  GeneratedDateTimeColumn get date => _date ??= _constructDate();
+  GeneratedDateTimeColumn _constructDate() {
+    return GeneratedDateTimeColumn(
+      'date',
+      $tableName,
+      false,
+    );
   }
 
   final VerificationMeta _typeMeta = const VerificationMeta('type');
@@ -1912,7 +1915,7 @@ class $CompaniesTable extends Companies
   @override
   GeneratedTextColumn get region => _region ??= _constructRegion();
   GeneratedTextColumn _constructRegion() {
-    return GeneratedTextColumn('region', $tableName, false,
+    return GeneratedTextColumn('region', $tableName, true,
         minTextLength: 1, maxTextLength: 20);
   }
 
@@ -1921,7 +1924,7 @@ class $CompaniesTable extends Companies
   @override
   GeneratedTextColumn get currency => _currency ??= _constructCurrency();
   GeneratedTextColumn _constructCurrency() {
-    return GeneratedTextColumn('currency', $tableName, false,
+    return GeneratedTextColumn('currency', $tableName, true,
         minTextLength: 1, maxTextLength: 20);
   }
 
@@ -2021,14 +2024,10 @@ class $CompaniesTable extends Companies
     if (d.region.present) {
       context.handle(
           _regionMeta, region.isAcceptableValue(d.region.value, _regionMeta));
-    } else if (isInserting) {
-      context.missing(_regionMeta);
     }
     if (d.currency.present) {
       context.handle(_currencyMeta,
           currency.isAcceptableValue(d.currency.value, _currencyMeta));
-    } else if (isInserting) {
-      context.missing(_currencyMeta);
     }
     if (d.isEnabled.present) {
       context.handle(_isEnabledMeta,
@@ -2070,7 +2069,7 @@ class $CompaniesTable extends Companies
       map['iex_id'] = Variable<String, StringType>(d.iexId.value);
     }
     if (d.date.present) {
-      map['date'] = Variable<String, StringType>(d.date.value);
+      map['date'] = Variable<DateTime, DateTimeType>(d.date.value);
     }
     if (d.type.present) {
       map['type'] = Variable<String, StringType>(d.type.value);
@@ -2099,6 +2098,767 @@ class $CompaniesTable extends Companies
   }
 }
 
+class ChartEntry extends DataClass implements Insertable<ChartEntry> {
+  final int id;
+  final String symbol;
+  final DateTime date;
+  final double open;
+  final double close;
+  final double high;
+  final double low;
+  final int volume;
+  final double uOpen;
+  final double uClose;
+  final double uHigh;
+  final double uLow;
+  final int uVolume;
+  final double change;
+  final double changePercent;
+  final String label;
+  final double changeOverTime;
+  ChartEntry(
+      {@required this.id,
+      @required this.symbol,
+      @required this.date,
+      this.open,
+      this.close,
+      this.high,
+      this.low,
+      this.volume,
+      this.uOpen,
+      this.uClose,
+      this.uHigh,
+      this.uLow,
+      this.uVolume,
+      this.change,
+      this.changePercent,
+      @required this.label,
+      this.changeOverTime});
+  factory ChartEntry.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final intType = db.typeSystem.forDartType<int>();
+    final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final doubleType = db.typeSystem.forDartType<double>();
+    return ChartEntry(
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      symbol:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}symbol']),
+      date:
+          dateTimeType.mapFromDatabaseResponse(data['${effectivePrefix}date']),
+      open: doubleType.mapFromDatabaseResponse(data['${effectivePrefix}open']),
+      close:
+          doubleType.mapFromDatabaseResponse(data['${effectivePrefix}close']),
+      high: doubleType.mapFromDatabaseResponse(data['${effectivePrefix}high']),
+      low: doubleType.mapFromDatabaseResponse(data['${effectivePrefix}low']),
+      volume: intType.mapFromDatabaseResponse(data['${effectivePrefix}volume']),
+      uOpen:
+          doubleType.mapFromDatabaseResponse(data['${effectivePrefix}u_open']),
+      uClose:
+          doubleType.mapFromDatabaseResponse(data['${effectivePrefix}u_close']),
+      uHigh:
+          doubleType.mapFromDatabaseResponse(data['${effectivePrefix}u_high']),
+      uLow: doubleType.mapFromDatabaseResponse(data['${effectivePrefix}u_low']),
+      uVolume:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}u_volume']),
+      change:
+          doubleType.mapFromDatabaseResponse(data['${effectivePrefix}change']),
+      changePercent: doubleType
+          .mapFromDatabaseResponse(data['${effectivePrefix}change_percent']),
+      label:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}label']),
+      changeOverTime: doubleType
+          .mapFromDatabaseResponse(data['${effectivePrefix}change_over_time']),
+    );
+  }
+  factory ChartEntry.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return ChartEntry(
+      id: serializer.fromJson<int>(json['id']),
+      symbol: serializer.fromJson<String>(json['symbol']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      open: serializer.fromJson<double>(json['open']),
+      close: serializer.fromJson<double>(json['close']),
+      high: serializer.fromJson<double>(json['high']),
+      low: serializer.fromJson<double>(json['low']),
+      volume: serializer.fromJson<int>(json['volume']),
+      uOpen: serializer.fromJson<double>(json['uOpen']),
+      uClose: serializer.fromJson<double>(json['uClose']),
+      uHigh: serializer.fromJson<double>(json['uHigh']),
+      uLow: serializer.fromJson<double>(json['uLow']),
+      uVolume: serializer.fromJson<int>(json['uVolume']),
+      change: serializer.fromJson<double>(json['change']),
+      changePercent: serializer.fromJson<double>(json['changePercent']),
+      label: serializer.fromJson<String>(json['label']),
+      changeOverTime: serializer.fromJson<double>(json['changeOverTime']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'symbol': serializer.toJson<String>(symbol),
+      'date': serializer.toJson<DateTime>(date),
+      'open': serializer.toJson<double>(open),
+      'close': serializer.toJson<double>(close),
+      'high': serializer.toJson<double>(high),
+      'low': serializer.toJson<double>(low),
+      'volume': serializer.toJson<int>(volume),
+      'uOpen': serializer.toJson<double>(uOpen),
+      'uClose': serializer.toJson<double>(uClose),
+      'uHigh': serializer.toJson<double>(uHigh),
+      'uLow': serializer.toJson<double>(uLow),
+      'uVolume': serializer.toJson<int>(uVolume),
+      'change': serializer.toJson<double>(change),
+      'changePercent': serializer.toJson<double>(changePercent),
+      'label': serializer.toJson<String>(label),
+      'changeOverTime': serializer.toJson<double>(changeOverTime),
+    };
+  }
+
+  @override
+  ChartCompanion createCompanion(bool nullToAbsent) {
+    return ChartCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      symbol:
+          symbol == null && nullToAbsent ? const Value.absent() : Value(symbol),
+      date: date == null && nullToAbsent ? const Value.absent() : Value(date),
+      open: open == null && nullToAbsent ? const Value.absent() : Value(open),
+      close:
+          close == null && nullToAbsent ? const Value.absent() : Value(close),
+      high: high == null && nullToAbsent ? const Value.absent() : Value(high),
+      low: low == null && nullToAbsent ? const Value.absent() : Value(low),
+      volume:
+          volume == null && nullToAbsent ? const Value.absent() : Value(volume),
+      uOpen:
+          uOpen == null && nullToAbsent ? const Value.absent() : Value(uOpen),
+      uClose:
+          uClose == null && nullToAbsent ? const Value.absent() : Value(uClose),
+      uHigh:
+          uHigh == null && nullToAbsent ? const Value.absent() : Value(uHigh),
+      uLow: uLow == null && nullToAbsent ? const Value.absent() : Value(uLow),
+      uVolume: uVolume == null && nullToAbsent
+          ? const Value.absent()
+          : Value(uVolume),
+      change:
+          change == null && nullToAbsent ? const Value.absent() : Value(change),
+      changePercent: changePercent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(changePercent),
+      label:
+          label == null && nullToAbsent ? const Value.absent() : Value(label),
+      changeOverTime: changeOverTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(changeOverTime),
+    );
+  }
+
+  ChartEntry copyWith(
+          {int id,
+          String symbol,
+          DateTime date,
+          double open,
+          double close,
+          double high,
+          double low,
+          int volume,
+          double uOpen,
+          double uClose,
+          double uHigh,
+          double uLow,
+          int uVolume,
+          double change,
+          double changePercent,
+          String label,
+          double changeOverTime}) =>
+      ChartEntry(
+        id: id ?? this.id,
+        symbol: symbol ?? this.symbol,
+        date: date ?? this.date,
+        open: open ?? this.open,
+        close: close ?? this.close,
+        high: high ?? this.high,
+        low: low ?? this.low,
+        volume: volume ?? this.volume,
+        uOpen: uOpen ?? this.uOpen,
+        uClose: uClose ?? this.uClose,
+        uHigh: uHigh ?? this.uHigh,
+        uLow: uLow ?? this.uLow,
+        uVolume: uVolume ?? this.uVolume,
+        change: change ?? this.change,
+        changePercent: changePercent ?? this.changePercent,
+        label: label ?? this.label,
+        changeOverTime: changeOverTime ?? this.changeOverTime,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ChartEntry(')
+          ..write('id: $id, ')
+          ..write('symbol: $symbol, ')
+          ..write('date: $date, ')
+          ..write('open: $open, ')
+          ..write('close: $close, ')
+          ..write('high: $high, ')
+          ..write('low: $low, ')
+          ..write('volume: $volume, ')
+          ..write('uOpen: $uOpen, ')
+          ..write('uClose: $uClose, ')
+          ..write('uHigh: $uHigh, ')
+          ..write('uLow: $uLow, ')
+          ..write('uVolume: $uVolume, ')
+          ..write('change: $change, ')
+          ..write('changePercent: $changePercent, ')
+          ..write('label: $label, ')
+          ..write('changeOverTime: $changeOverTime')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      id.hashCode,
+      $mrjc(
+          symbol.hashCode,
+          $mrjc(
+              date.hashCode,
+              $mrjc(
+                  open.hashCode,
+                  $mrjc(
+                      close.hashCode,
+                      $mrjc(
+                          high.hashCode,
+                          $mrjc(
+                              low.hashCode,
+                              $mrjc(
+                                  volume.hashCode,
+                                  $mrjc(
+                                      uOpen.hashCode,
+                                      $mrjc(
+                                          uClose.hashCode,
+                                          $mrjc(
+                                              uHigh.hashCode,
+                                              $mrjc(
+                                                  uLow.hashCode,
+                                                  $mrjc(
+                                                      uVolume.hashCode,
+                                                      $mrjc(
+                                                          change.hashCode,
+                                                          $mrjc(
+                                                              changePercent
+                                                                  .hashCode,
+                                                              $mrjc(
+                                                                  label
+                                                                      .hashCode,
+                                                                  changeOverTime
+                                                                      .hashCode)))))))))))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is ChartEntry &&
+          other.id == this.id &&
+          other.symbol == this.symbol &&
+          other.date == this.date &&
+          other.open == this.open &&
+          other.close == this.close &&
+          other.high == this.high &&
+          other.low == this.low &&
+          other.volume == this.volume &&
+          other.uOpen == this.uOpen &&
+          other.uClose == this.uClose &&
+          other.uHigh == this.uHigh &&
+          other.uLow == this.uLow &&
+          other.uVolume == this.uVolume &&
+          other.change == this.change &&
+          other.changePercent == this.changePercent &&
+          other.label == this.label &&
+          other.changeOverTime == this.changeOverTime);
+}
+
+class ChartCompanion extends UpdateCompanion<ChartEntry> {
+  final Value<int> id;
+  final Value<String> symbol;
+  final Value<DateTime> date;
+  final Value<double> open;
+  final Value<double> close;
+  final Value<double> high;
+  final Value<double> low;
+  final Value<int> volume;
+  final Value<double> uOpen;
+  final Value<double> uClose;
+  final Value<double> uHigh;
+  final Value<double> uLow;
+  final Value<int> uVolume;
+  final Value<double> change;
+  final Value<double> changePercent;
+  final Value<String> label;
+  final Value<double> changeOverTime;
+  const ChartCompanion({
+    this.id = const Value.absent(),
+    this.symbol = const Value.absent(),
+    this.date = const Value.absent(),
+    this.open = const Value.absent(),
+    this.close = const Value.absent(),
+    this.high = const Value.absent(),
+    this.low = const Value.absent(),
+    this.volume = const Value.absent(),
+    this.uOpen = const Value.absent(),
+    this.uClose = const Value.absent(),
+    this.uHigh = const Value.absent(),
+    this.uLow = const Value.absent(),
+    this.uVolume = const Value.absent(),
+    this.change = const Value.absent(),
+    this.changePercent = const Value.absent(),
+    this.label = const Value.absent(),
+    this.changeOverTime = const Value.absent(),
+  });
+  ChartCompanion.insert({
+    this.id = const Value.absent(),
+    @required String symbol,
+    @required DateTime date,
+    this.open = const Value.absent(),
+    this.close = const Value.absent(),
+    this.high = const Value.absent(),
+    this.low = const Value.absent(),
+    this.volume = const Value.absent(),
+    this.uOpen = const Value.absent(),
+    this.uClose = const Value.absent(),
+    this.uHigh = const Value.absent(),
+    this.uLow = const Value.absent(),
+    this.uVolume = const Value.absent(),
+    this.change = const Value.absent(),
+    this.changePercent = const Value.absent(),
+    @required String label,
+    this.changeOverTime = const Value.absent(),
+  })  : symbol = Value(symbol),
+        date = Value(date),
+        label = Value(label);
+  ChartCompanion copyWith(
+      {Value<int> id,
+      Value<String> symbol,
+      Value<DateTime> date,
+      Value<double> open,
+      Value<double> close,
+      Value<double> high,
+      Value<double> low,
+      Value<int> volume,
+      Value<double> uOpen,
+      Value<double> uClose,
+      Value<double> uHigh,
+      Value<double> uLow,
+      Value<int> uVolume,
+      Value<double> change,
+      Value<double> changePercent,
+      Value<String> label,
+      Value<double> changeOverTime}) {
+    return ChartCompanion(
+      id: id ?? this.id,
+      symbol: symbol ?? this.symbol,
+      date: date ?? this.date,
+      open: open ?? this.open,
+      close: close ?? this.close,
+      high: high ?? this.high,
+      low: low ?? this.low,
+      volume: volume ?? this.volume,
+      uOpen: uOpen ?? this.uOpen,
+      uClose: uClose ?? this.uClose,
+      uHigh: uHigh ?? this.uHigh,
+      uLow: uLow ?? this.uLow,
+      uVolume: uVolume ?? this.uVolume,
+      change: change ?? this.change,
+      changePercent: changePercent ?? this.changePercent,
+      label: label ?? this.label,
+      changeOverTime: changeOverTime ?? this.changeOverTime,
+    );
+  }
+}
+
+class $ChartTable extends Chart with TableInfo<$ChartTable, ChartEntry> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $ChartTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  GeneratedIntColumn _id;
+  @override
+  GeneratedIntColumn get id => _id ??= _constructId();
+  GeneratedIntColumn _constructId() {
+    return GeneratedIntColumn('id', $tableName, false,
+        hasAutoIncrement: true, declaredAsPrimaryKey: true);
+  }
+
+  final VerificationMeta _symbolMeta = const VerificationMeta('symbol');
+  GeneratedTextColumn _symbol;
+  @override
+  GeneratedTextColumn get symbol => _symbol ??= _constructSymbol();
+  GeneratedTextColumn _constructSymbol() {
+    return GeneratedTextColumn('symbol', $tableName, false,
+        minTextLength: 1, maxTextLength: 20);
+  }
+
+  final VerificationMeta _dateMeta = const VerificationMeta('date');
+  GeneratedDateTimeColumn _date;
+  @override
+  GeneratedDateTimeColumn get date => _date ??= _constructDate();
+  GeneratedDateTimeColumn _constructDate() {
+    return GeneratedDateTimeColumn(
+      'date',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _openMeta = const VerificationMeta('open');
+  GeneratedRealColumn _open;
+  @override
+  GeneratedRealColumn get open => _open ??= _constructOpen();
+  GeneratedRealColumn _constructOpen() {
+    return GeneratedRealColumn(
+      'open',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _closeMeta = const VerificationMeta('close');
+  GeneratedRealColumn _close;
+  @override
+  GeneratedRealColumn get close => _close ??= _constructClose();
+  GeneratedRealColumn _constructClose() {
+    return GeneratedRealColumn(
+      'close',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _highMeta = const VerificationMeta('high');
+  GeneratedRealColumn _high;
+  @override
+  GeneratedRealColumn get high => _high ??= _constructHigh();
+  GeneratedRealColumn _constructHigh() {
+    return GeneratedRealColumn(
+      'high',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _lowMeta = const VerificationMeta('low');
+  GeneratedRealColumn _low;
+  @override
+  GeneratedRealColumn get low => _low ??= _constructLow();
+  GeneratedRealColumn _constructLow() {
+    return GeneratedRealColumn(
+      'low',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _volumeMeta = const VerificationMeta('volume');
+  GeneratedIntColumn _volume;
+  @override
+  GeneratedIntColumn get volume => _volume ??= _constructVolume();
+  GeneratedIntColumn _constructVolume() {
+    return GeneratedIntColumn(
+      'volume',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _uOpenMeta = const VerificationMeta('uOpen');
+  GeneratedRealColumn _uOpen;
+  @override
+  GeneratedRealColumn get uOpen => _uOpen ??= _constructUOpen();
+  GeneratedRealColumn _constructUOpen() {
+    return GeneratedRealColumn(
+      'u_open',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _uCloseMeta = const VerificationMeta('uClose');
+  GeneratedRealColumn _uClose;
+  @override
+  GeneratedRealColumn get uClose => _uClose ??= _constructUClose();
+  GeneratedRealColumn _constructUClose() {
+    return GeneratedRealColumn(
+      'u_close',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _uHighMeta = const VerificationMeta('uHigh');
+  GeneratedRealColumn _uHigh;
+  @override
+  GeneratedRealColumn get uHigh => _uHigh ??= _constructUHigh();
+  GeneratedRealColumn _constructUHigh() {
+    return GeneratedRealColumn(
+      'u_high',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _uLowMeta = const VerificationMeta('uLow');
+  GeneratedRealColumn _uLow;
+  @override
+  GeneratedRealColumn get uLow => _uLow ??= _constructULow();
+  GeneratedRealColumn _constructULow() {
+    return GeneratedRealColumn(
+      'u_low',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _uVolumeMeta = const VerificationMeta('uVolume');
+  GeneratedIntColumn _uVolume;
+  @override
+  GeneratedIntColumn get uVolume => _uVolume ??= _constructUVolume();
+  GeneratedIntColumn _constructUVolume() {
+    return GeneratedIntColumn(
+      'u_volume',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _changeMeta = const VerificationMeta('change');
+  GeneratedRealColumn _change;
+  @override
+  GeneratedRealColumn get change => _change ??= _constructChange();
+  GeneratedRealColumn _constructChange() {
+    return GeneratedRealColumn(
+      'change',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _changePercentMeta =
+      const VerificationMeta('changePercent');
+  GeneratedRealColumn _changePercent;
+  @override
+  GeneratedRealColumn get changePercent =>
+      _changePercent ??= _constructChangePercent();
+  GeneratedRealColumn _constructChangePercent() {
+    return GeneratedRealColumn(
+      'change_percent',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _labelMeta = const VerificationMeta('label');
+  GeneratedTextColumn _label;
+  @override
+  GeneratedTextColumn get label => _label ??= _constructLabel();
+  GeneratedTextColumn _constructLabel() {
+    return GeneratedTextColumn('label', $tableName, false,
+        minTextLength: 1, maxTextLength: 20);
+  }
+
+  final VerificationMeta _changeOverTimeMeta =
+      const VerificationMeta('changeOverTime');
+  GeneratedRealColumn _changeOverTime;
+  @override
+  GeneratedRealColumn get changeOverTime =>
+      _changeOverTime ??= _constructChangeOverTime();
+  GeneratedRealColumn _constructChangeOverTime() {
+    return GeneratedRealColumn(
+      'change_over_time',
+      $tableName,
+      true,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        symbol,
+        date,
+        open,
+        close,
+        high,
+        low,
+        volume,
+        uOpen,
+        uClose,
+        uHigh,
+        uLow,
+        uVolume,
+        change,
+        changePercent,
+        label,
+        changeOverTime
+      ];
+  @override
+  $ChartTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'chart';
+  @override
+  final String actualTableName = 'chart';
+  @override
+  VerificationContext validateIntegrity(ChartCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.id.present) {
+      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    }
+    if (d.symbol.present) {
+      context.handle(
+          _symbolMeta, symbol.isAcceptableValue(d.symbol.value, _symbolMeta));
+    } else if (isInserting) {
+      context.missing(_symbolMeta);
+    }
+    if (d.date.present) {
+      context.handle(
+          _dateMeta, date.isAcceptableValue(d.date.value, _dateMeta));
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (d.open.present) {
+      context.handle(
+          _openMeta, open.isAcceptableValue(d.open.value, _openMeta));
+    }
+    if (d.close.present) {
+      context.handle(
+          _closeMeta, close.isAcceptableValue(d.close.value, _closeMeta));
+    }
+    if (d.high.present) {
+      context.handle(
+          _highMeta, high.isAcceptableValue(d.high.value, _highMeta));
+    }
+    if (d.low.present) {
+      context.handle(_lowMeta, low.isAcceptableValue(d.low.value, _lowMeta));
+    }
+    if (d.volume.present) {
+      context.handle(
+          _volumeMeta, volume.isAcceptableValue(d.volume.value, _volumeMeta));
+    }
+    if (d.uOpen.present) {
+      context.handle(
+          _uOpenMeta, uOpen.isAcceptableValue(d.uOpen.value, _uOpenMeta));
+    }
+    if (d.uClose.present) {
+      context.handle(
+          _uCloseMeta, uClose.isAcceptableValue(d.uClose.value, _uCloseMeta));
+    }
+    if (d.uHigh.present) {
+      context.handle(
+          _uHighMeta, uHigh.isAcceptableValue(d.uHigh.value, _uHighMeta));
+    }
+    if (d.uLow.present) {
+      context.handle(
+          _uLowMeta, uLow.isAcceptableValue(d.uLow.value, _uLowMeta));
+    }
+    if (d.uVolume.present) {
+      context.handle(_uVolumeMeta,
+          uVolume.isAcceptableValue(d.uVolume.value, _uVolumeMeta));
+    }
+    if (d.change.present) {
+      context.handle(
+          _changeMeta, change.isAcceptableValue(d.change.value, _changeMeta));
+    }
+    if (d.changePercent.present) {
+      context.handle(
+          _changePercentMeta,
+          changePercent.isAcceptableValue(
+              d.changePercent.value, _changePercentMeta));
+    }
+    if (d.label.present) {
+      context.handle(
+          _labelMeta, label.isAcceptableValue(d.label.value, _labelMeta));
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (d.changeOverTime.present) {
+      context.handle(
+          _changeOverTimeMeta,
+          changeOverTime.isAcceptableValue(
+              d.changeOverTime.value, _changeOverTimeMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ChartEntry map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return ChartEntry.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(ChartCompanion d) {
+    final map = <String, Variable>{};
+    if (d.id.present) {
+      map['id'] = Variable<int, IntType>(d.id.value);
+    }
+    if (d.symbol.present) {
+      map['symbol'] = Variable<String, StringType>(d.symbol.value);
+    }
+    if (d.date.present) {
+      map['date'] = Variable<DateTime, DateTimeType>(d.date.value);
+    }
+    if (d.open.present) {
+      map['open'] = Variable<double, RealType>(d.open.value);
+    }
+    if (d.close.present) {
+      map['close'] = Variable<double, RealType>(d.close.value);
+    }
+    if (d.high.present) {
+      map['high'] = Variable<double, RealType>(d.high.value);
+    }
+    if (d.low.present) {
+      map['low'] = Variable<double, RealType>(d.low.value);
+    }
+    if (d.volume.present) {
+      map['volume'] = Variable<int, IntType>(d.volume.value);
+    }
+    if (d.uOpen.present) {
+      map['u_open'] = Variable<double, RealType>(d.uOpen.value);
+    }
+    if (d.uClose.present) {
+      map['u_close'] = Variable<double, RealType>(d.uClose.value);
+    }
+    if (d.uHigh.present) {
+      map['u_high'] = Variable<double, RealType>(d.uHigh.value);
+    }
+    if (d.uLow.present) {
+      map['u_low'] = Variable<double, RealType>(d.uLow.value);
+    }
+    if (d.uVolume.present) {
+      map['u_volume'] = Variable<int, IntType>(d.uVolume.value);
+    }
+    if (d.change.present) {
+      map['change'] = Variable<double, RealType>(d.change.value);
+    }
+    if (d.changePercent.present) {
+      map['change_percent'] = Variable<double, RealType>(d.changePercent.value);
+    }
+    if (d.label.present) {
+      map['label'] = Variable<String, StringType>(d.label.value);
+    }
+    if (d.changeOverTime.present) {
+      map['change_over_time'] =
+          Variable<double, RealType>(d.changeOverTime.value);
+    }
+    return map;
+  }
+
+  @override
+  $ChartTable createAlias(String alias) {
+    return $ChartTable(_db, alias);
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   $PortfolioTable _portfolio;
@@ -2107,6 +2867,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $QuotesTable get quotes => _quotes ??= $QuotesTable(this);
   $CompaniesTable _companies;
   $CompaniesTable get companies => _companies ??= $CompaniesTable(this);
+  $ChartTable _chart;
+  $ChartTable get chart => _chart ??= $ChartTable(this);
   PortfolioDao _portfolioDao;
   PortfolioDao get portfolioDao =>
       _portfolioDao ??= PortfolioDao(this as AppDatabase);
@@ -2114,9 +2876,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   QuoteDao get quoteDao => _quoteDao ??= QuoteDao(this as AppDatabase);
   CompanyDao _companyDao;
   CompanyDao get companyDao => _companyDao ??= CompanyDao(this as AppDatabase);
+  ChartDao _chartDao;
+  ChartDao get chartDao => _chartDao ??= ChartDao(this as AppDatabase);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [portfolio, quotes, companies];
+      [portfolio, quotes, companies, chart];
 }

@@ -1,12 +1,12 @@
 import 'package:moor_flutter/moor_flutter.dart';
 
-@DataClassName('ChartElement')
+@DataClassName('ChartEntry')
 class Chart extends Table {
   String get tableName => 'chart';
 
   IntColumn get id => integer().autoIncrement()();
   TextColumn get symbol => text().withLength(min:1,max:20)();
-  TextColumn get date => text().withLength(min:1,max:20)();
+  DateTimeColumn get date => dateTime()();
   RealColumn get open => real().nullable()();
   RealColumn get close => real().nullable()();
   RealColumn get high => real().nullable()();

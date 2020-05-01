@@ -8,10 +8,10 @@ class Companies extends Table {
   TextColumn get symbol => text().withLength(min:1,max:20)();
   TextColumn get name => text().withLength(min:1,max:100)();
   TextColumn get iexId => text().withLength(min:1,max:100)();
-  TextColumn get date => text().withLength(min:1,max:20)();
+  DateTimeColumn get date => dateTime()();
   TextColumn get type => text().withLength(min:1,max:20)();
-  TextColumn get region => text().withLength(min:1,max:20)();
-  TextColumn get currency => text().withLength(min:1,max:20)();
+  TextColumn get region => text().withLength(min:1,max:20).nullable()();
+  TextColumn get currency => text().withLength(min:1,max:20).nullable()();
   BoolColumn get isEnabled => boolean()();
   TextColumn get figi => text().nullable()();
   TextColumn get cik => text().nullable()();
