@@ -5,14 +5,16 @@ class Quotes extends Table {
   String get tableName => 'quotes';
 
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get symbol => text().withLength(min:1,max:20)();
+  TextColumn get symbol => text().withLength(min:1,max:20).customConstraint('UNIQUE')();
   TextColumn get name => text().withLength(min:1,max:100)();
-
+  TextColumn get primaryExchange => text().withLength(min:1,max:100).nullable()();
   TextColumn get calculationPrice => text().nullable()();
+
   RealColumn get latestPrice => real().nullable()();
   TextColumn get latestSource => text().nullable()();
+  TextColumn get latestTime => text().nullable()();
+  DateTimeColumn get latestUpdate => dateTime().nullable()();
   IntColumn get latestVolume => integer().nullable()();
-  DateTimeColumn get latestTime => dateTime().nullable()();
 
   RealColumn get open => real().nullable()();
   DateTimeColumn get openTime => dateTime().nullable()();
@@ -43,4 +45,11 @@ class Quotes extends Table {
   RealColumn get ytdChange => real().nullable()();
 
   DateTimeColumn get lastTradeTime => dateTime().nullable()();
+
+  @override
+  List<String> get customConstraints {
+
+  }
+
+
 }

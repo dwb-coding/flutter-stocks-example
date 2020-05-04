@@ -8,23 +8,27 @@ part 'company_dao.g.dart';
 
 @UseDao(tables: [Companies])
 class CompanyDao extends DatabaseAccessor<AppDatabase> with _$CompanyDaoMixin {
-  final AppDatabase db;
+
   final _searchController = StreamController<List<Company>>();
 
-  CompanyDao(this.db) : super(db);
+  CompanyDao(AppDatabase db) : super(db);
 
-  Future add(List<Company> companyList) => transaction(() async {
-    companyList.forEach((c) async {
-      await into(companies).insert(c);
-    });
-  });
+  Future add(List<Company> list) =>
+      transaction(() async {
+        list.forEach((company) async {
+          await into(companies).insert(company);
+        });
+      });
 
   // delete all companies
   Future removeAll() async => await delete(companies).go();
 
-  void search(String symbol) =>
-      (select(companies)..where((company) => company.symbol.like('%$symbol%'))
-      ).watch().listen((List companies) => _searchController.sink.add(companies));
+  Future search(String symbol) async {
+      final query = select(companies)
+        ..where((company) => company.symbol.like('%$symbol%'));
+      final results = await query.get();
+      _searchController.sink.add(results);
+  }
 
   // search results are returned via this stream
   Stream<List<Company>> get searchResults => _searchController.stream;

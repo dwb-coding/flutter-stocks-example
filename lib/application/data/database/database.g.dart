@@ -124,7 +124,7 @@ class $PortfolioTable extends Portfolio with TableInfo<$PortfolioTable, Stock> {
   GeneratedTextColumn get symbol => _symbol ??= _constructSymbol();
   GeneratedTextColumn _constructSymbol() {
     return GeneratedTextColumn('symbol', $tableName, false,
-        minTextLength: 1, maxTextLength: 20);
+        minTextLength: 1, maxTextLength: 20, $customConstraints: 'UNIQUE');
   }
 
   final VerificationMeta _nameMeta = const VerificationMeta('name');
@@ -199,11 +199,13 @@ class Quote extends DataClass implements Insertable<Quote> {
   final int id;
   final String symbol;
   final String name;
+  final String primaryExchange;
   final String calculationPrice;
   final double latestPrice;
   final String latestSource;
+  final String latestTime;
+  final DateTime latestUpdate;
   final int latestVolume;
-  final DateTime latestTime;
   final double open;
   final DateTime openTime;
   final double close;
@@ -232,11 +234,13 @@ class Quote extends DataClass implements Insertable<Quote> {
       {@required this.id,
       @required this.symbol,
       @required this.name,
+      this.primaryExchange,
       this.calculationPrice,
       this.latestPrice,
       this.latestSource,
-      this.latestVolume,
       this.latestTime,
+      this.latestUpdate,
+      this.latestVolume,
       this.open,
       this.openTime,
       this.close,
@@ -273,16 +277,20 @@ class Quote extends DataClass implements Insertable<Quote> {
       symbol:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}symbol']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
+      primaryExchange: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}primary_exchange']),
       calculationPrice: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}calculation_price']),
       latestPrice: doubleType
           .mapFromDatabaseResponse(data['${effectivePrefix}latest_price']),
       latestSource: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}latest_source']),
+      latestTime: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}latest_time']),
+      latestUpdate: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}latest_update']),
       latestVolume: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}latest_volume']),
-      latestTime: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}latest_time']),
       open: doubleType.mapFromDatabaseResponse(data['${effectivePrefix}open']),
       openTime: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}open_time']),
@@ -336,11 +344,13 @@ class Quote extends DataClass implements Insertable<Quote> {
       id: serializer.fromJson<int>(json['id']),
       symbol: serializer.fromJson<String>(json['symbol']),
       name: serializer.fromJson<String>(json['name']),
+      primaryExchange: serializer.fromJson<String>(json['primaryExchange']),
       calculationPrice: serializer.fromJson<String>(json['calculationPrice']),
       latestPrice: serializer.fromJson<double>(json['latestPrice']),
       latestSource: serializer.fromJson<String>(json['latestSource']),
+      latestTime: serializer.fromJson<String>(json['latestTime']),
+      latestUpdate: serializer.fromJson<DateTime>(json['latestUpdate']),
       latestVolume: serializer.fromJson<int>(json['latestVolume']),
-      latestTime: serializer.fromJson<DateTime>(json['latestTime']),
       open: serializer.fromJson<double>(json['open']),
       openTime: serializer.fromJson<DateTime>(json['openTime']),
       close: serializer.fromJson<double>(json['close']),
@@ -376,11 +386,13 @@ class Quote extends DataClass implements Insertable<Quote> {
       'id': serializer.toJson<int>(id),
       'symbol': serializer.toJson<String>(symbol),
       'name': serializer.toJson<String>(name),
+      'primaryExchange': serializer.toJson<String>(primaryExchange),
       'calculationPrice': serializer.toJson<String>(calculationPrice),
       'latestPrice': serializer.toJson<double>(latestPrice),
       'latestSource': serializer.toJson<String>(latestSource),
+      'latestTime': serializer.toJson<String>(latestTime),
+      'latestUpdate': serializer.toJson<DateTime>(latestUpdate),
       'latestVolume': serializer.toJson<int>(latestVolume),
-      'latestTime': serializer.toJson<DateTime>(latestTime),
       'open': serializer.toJson<double>(open),
       'openTime': serializer.toJson<DateTime>(openTime),
       'close': serializer.toJson<double>(close),
@@ -415,6 +427,9 @@ class Quote extends DataClass implements Insertable<Quote> {
       symbol:
           symbol == null && nullToAbsent ? const Value.absent() : Value(symbol),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      primaryExchange: primaryExchange == null && nullToAbsent
+          ? const Value.absent()
+          : Value(primaryExchange),
       calculationPrice: calculationPrice == null && nullToAbsent
           ? const Value.absent()
           : Value(calculationPrice),
@@ -424,12 +439,15 @@ class Quote extends DataClass implements Insertable<Quote> {
       latestSource: latestSource == null && nullToAbsent
           ? const Value.absent()
           : Value(latestSource),
-      latestVolume: latestVolume == null && nullToAbsent
-          ? const Value.absent()
-          : Value(latestVolume),
       latestTime: latestTime == null && nullToAbsent
           ? const Value.absent()
           : Value(latestTime),
+      latestUpdate: latestUpdate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latestUpdate),
+      latestVolume: latestVolume == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latestVolume),
       open: open == null && nullToAbsent ? const Value.absent() : Value(open),
       openTime: openTime == null && nullToAbsent
           ? const Value.absent()
@@ -500,11 +518,13 @@ class Quote extends DataClass implements Insertable<Quote> {
           {int id,
           String symbol,
           String name,
+          String primaryExchange,
           String calculationPrice,
           double latestPrice,
           String latestSource,
+          String latestTime,
+          DateTime latestUpdate,
           int latestVolume,
-          DateTime latestTime,
           double open,
           DateTime openTime,
           double close,
@@ -533,11 +553,13 @@ class Quote extends DataClass implements Insertable<Quote> {
         id: id ?? this.id,
         symbol: symbol ?? this.symbol,
         name: name ?? this.name,
+        primaryExchange: primaryExchange ?? this.primaryExchange,
         calculationPrice: calculationPrice ?? this.calculationPrice,
         latestPrice: latestPrice ?? this.latestPrice,
         latestSource: latestSource ?? this.latestSource,
-        latestVolume: latestVolume ?? this.latestVolume,
         latestTime: latestTime ?? this.latestTime,
+        latestUpdate: latestUpdate ?? this.latestUpdate,
+        latestVolume: latestVolume ?? this.latestVolume,
         open: open ?? this.open,
         openTime: openTime ?? this.openTime,
         close: close ?? this.close,
@@ -570,11 +592,13 @@ class Quote extends DataClass implements Insertable<Quote> {
           ..write('id: $id, ')
           ..write('symbol: $symbol, ')
           ..write('name: $name, ')
+          ..write('primaryExchange: $primaryExchange, ')
           ..write('calculationPrice: $calculationPrice, ')
           ..write('latestPrice: $latestPrice, ')
           ..write('latestSource: $latestSource, ')
-          ..write('latestVolume: $latestVolume, ')
           ..write('latestTime: $latestTime, ')
+          ..write('latestUpdate: $latestUpdate, ')
+          ..write('latestVolume: $latestVolume, ')
           ..write('open: $open, ')
           ..write('openTime: $openTime, ')
           ..write('close: $close, ')
@@ -611,41 +635,41 @@ class Quote extends DataClass implements Insertable<Quote> {
           $mrjc(
               name.hashCode,
               $mrjc(
-                  calculationPrice.hashCode,
+                  primaryExchange.hashCode,
                   $mrjc(
-                      latestPrice.hashCode,
+                      calculationPrice.hashCode,
                       $mrjc(
-                          latestSource.hashCode,
+                          latestPrice.hashCode,
                           $mrjc(
-                              latestVolume.hashCode,
+                              latestSource.hashCode,
                               $mrjc(
                                   latestTime.hashCode,
                                   $mrjc(
-                                      open.hashCode,
+                                      latestUpdate.hashCode,
                                       $mrjc(
-                                          openTime.hashCode,
+                                          latestVolume.hashCode,
                                           $mrjc(
-                                              close.hashCode,
+                                              open.hashCode,
                                               $mrjc(
-                                                  closeTime.hashCode,
+                                                  openTime.hashCode,
                                                   $mrjc(
-                                                      high.hashCode,
+                                                      close.hashCode,
                                                       $mrjc(
-                                                          highTime.hashCode,
+                                                          closeTime.hashCode,
                                                           $mrjc(
-                                                              low.hashCode,
+                                                              high.hashCode,
                                                               $mrjc(
-                                                                  lowTime
+                                                                  highTime
                                                                       .hashCode,
                                                                   $mrjc(
-                                                                      extendedPrice
+                                                                      low
                                                                           .hashCode,
                                                                       $mrjc(
-                                                                          extendedChange
+                                                                          lowTime
                                                                               .hashCode,
                                                                           $mrjc(
-                                                                              extendedChangePercent.hashCode,
-                                                                              $mrjc(extendedPriceTime.hashCode, $mrjc(previousClose.hashCode, $mrjc(previousVolume.hashCode, $mrjc(change.hashCode, $mrjc(changePercent.hashCode, $mrjc(volume.hashCode, $mrjc(avgTotalVolume.hashCode, $mrjc(marketCap.hashCode, $mrjc(peRatio.hashCode, $mrjc(week52High.hashCode, $mrjc(week52Low.hashCode, $mrjc(ytdChange.hashCode, lastTradeTime.hashCode))))))))))))))))))))))))))))))));
+                                                                              extendedPrice.hashCode,
+                                                                              $mrjc(extendedChange.hashCode, $mrjc(extendedChangePercent.hashCode, $mrjc(extendedPriceTime.hashCode, $mrjc(previousClose.hashCode, $mrjc(previousVolume.hashCode, $mrjc(change.hashCode, $mrjc(changePercent.hashCode, $mrjc(volume.hashCode, $mrjc(avgTotalVolume.hashCode, $mrjc(marketCap.hashCode, $mrjc(peRatio.hashCode, $mrjc(week52High.hashCode, $mrjc(week52Low.hashCode, $mrjc(ytdChange.hashCode, lastTradeTime.hashCode))))))))))))))))))))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -653,11 +677,13 @@ class Quote extends DataClass implements Insertable<Quote> {
           other.id == this.id &&
           other.symbol == this.symbol &&
           other.name == this.name &&
+          other.primaryExchange == this.primaryExchange &&
           other.calculationPrice == this.calculationPrice &&
           other.latestPrice == this.latestPrice &&
           other.latestSource == this.latestSource &&
-          other.latestVolume == this.latestVolume &&
           other.latestTime == this.latestTime &&
+          other.latestUpdate == this.latestUpdate &&
+          other.latestVolume == this.latestVolume &&
           other.open == this.open &&
           other.openTime == this.openTime &&
           other.close == this.close &&
@@ -688,11 +714,13 @@ class QuotesCompanion extends UpdateCompanion<Quote> {
   final Value<int> id;
   final Value<String> symbol;
   final Value<String> name;
+  final Value<String> primaryExchange;
   final Value<String> calculationPrice;
   final Value<double> latestPrice;
   final Value<String> latestSource;
+  final Value<String> latestTime;
+  final Value<DateTime> latestUpdate;
   final Value<int> latestVolume;
-  final Value<DateTime> latestTime;
   final Value<double> open;
   final Value<DateTime> openTime;
   final Value<double> close;
@@ -721,11 +749,13 @@ class QuotesCompanion extends UpdateCompanion<Quote> {
     this.id = const Value.absent(),
     this.symbol = const Value.absent(),
     this.name = const Value.absent(),
+    this.primaryExchange = const Value.absent(),
     this.calculationPrice = const Value.absent(),
     this.latestPrice = const Value.absent(),
     this.latestSource = const Value.absent(),
-    this.latestVolume = const Value.absent(),
     this.latestTime = const Value.absent(),
+    this.latestUpdate = const Value.absent(),
+    this.latestVolume = const Value.absent(),
     this.open = const Value.absent(),
     this.openTime = const Value.absent(),
     this.close = const Value.absent(),
@@ -755,11 +785,13 @@ class QuotesCompanion extends UpdateCompanion<Quote> {
     this.id = const Value.absent(),
     @required String symbol,
     @required String name,
+    this.primaryExchange = const Value.absent(),
     this.calculationPrice = const Value.absent(),
     this.latestPrice = const Value.absent(),
     this.latestSource = const Value.absent(),
-    this.latestVolume = const Value.absent(),
     this.latestTime = const Value.absent(),
+    this.latestUpdate = const Value.absent(),
+    this.latestVolume = const Value.absent(),
     this.open = const Value.absent(),
     this.openTime = const Value.absent(),
     this.close = const Value.absent(),
@@ -790,11 +822,13 @@ class QuotesCompanion extends UpdateCompanion<Quote> {
       {Value<int> id,
       Value<String> symbol,
       Value<String> name,
+      Value<String> primaryExchange,
       Value<String> calculationPrice,
       Value<double> latestPrice,
       Value<String> latestSource,
+      Value<String> latestTime,
+      Value<DateTime> latestUpdate,
       Value<int> latestVolume,
-      Value<DateTime> latestTime,
       Value<double> open,
       Value<DateTime> openTime,
       Value<double> close,
@@ -823,11 +857,13 @@ class QuotesCompanion extends UpdateCompanion<Quote> {
       id: id ?? this.id,
       symbol: symbol ?? this.symbol,
       name: name ?? this.name,
+      primaryExchange: primaryExchange ?? this.primaryExchange,
       calculationPrice: calculationPrice ?? this.calculationPrice,
       latestPrice: latestPrice ?? this.latestPrice,
       latestSource: latestSource ?? this.latestSource,
-      latestVolume: latestVolume ?? this.latestVolume,
       latestTime: latestTime ?? this.latestTime,
+      latestUpdate: latestUpdate ?? this.latestUpdate,
+      latestVolume: latestVolume ?? this.latestVolume,
       open: open ?? this.open,
       openTime: openTime ?? this.openTime,
       close: close ?? this.close,
@@ -876,7 +912,7 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, Quote> {
   GeneratedTextColumn get symbol => _symbol ??= _constructSymbol();
   GeneratedTextColumn _constructSymbol() {
     return GeneratedTextColumn('symbol', $tableName, false,
-        minTextLength: 1, maxTextLength: 20);
+        minTextLength: 1, maxTextLength: 20, $customConstraints: 'UNIQUE');
   }
 
   final VerificationMeta _nameMeta = const VerificationMeta('name');
@@ -885,6 +921,17 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, Quote> {
   GeneratedTextColumn get name => _name ??= _constructName();
   GeneratedTextColumn _constructName() {
     return GeneratedTextColumn('name', $tableName, false,
+        minTextLength: 1, maxTextLength: 100);
+  }
+
+  final VerificationMeta _primaryExchangeMeta =
+      const VerificationMeta('primaryExchange');
+  GeneratedTextColumn _primaryExchange;
+  @override
+  GeneratedTextColumn get primaryExchange =>
+      _primaryExchange ??= _constructPrimaryExchange();
+  GeneratedTextColumn _constructPrimaryExchange() {
+    return GeneratedTextColumn('primary_exchange', $tableName, true,
         minTextLength: 1, maxTextLength: 100);
   }
 
@@ -930,6 +977,32 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, Quote> {
     );
   }
 
+  final VerificationMeta _latestTimeMeta = const VerificationMeta('latestTime');
+  GeneratedTextColumn _latestTime;
+  @override
+  GeneratedTextColumn get latestTime => _latestTime ??= _constructLatestTime();
+  GeneratedTextColumn _constructLatestTime() {
+    return GeneratedTextColumn(
+      'latest_time',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _latestUpdateMeta =
+      const VerificationMeta('latestUpdate');
+  GeneratedDateTimeColumn _latestUpdate;
+  @override
+  GeneratedDateTimeColumn get latestUpdate =>
+      _latestUpdate ??= _constructLatestUpdate();
+  GeneratedDateTimeColumn _constructLatestUpdate() {
+    return GeneratedDateTimeColumn(
+      'latest_update',
+      $tableName,
+      true,
+    );
+  }
+
   final VerificationMeta _latestVolumeMeta =
       const VerificationMeta('latestVolume');
   GeneratedIntColumn _latestVolume;
@@ -939,19 +1012,6 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, Quote> {
   GeneratedIntColumn _constructLatestVolume() {
     return GeneratedIntColumn(
       'latest_volume',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _latestTimeMeta = const VerificationMeta('latestTime');
-  GeneratedDateTimeColumn _latestTime;
-  @override
-  GeneratedDateTimeColumn get latestTime =>
-      _latestTime ??= _constructLatestTime();
-  GeneratedDateTimeColumn _constructLatestTime() {
-    return GeneratedDateTimeColumn(
-      'latest_time',
       $tableName,
       true,
     );
@@ -1268,11 +1328,13 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, Quote> {
         id,
         symbol,
         name,
+        primaryExchange,
         calculationPrice,
         latestPrice,
         latestSource,
-        latestVolume,
         latestTime,
+        latestUpdate,
+        latestVolume,
         open,
         openTime,
         close,
@@ -1323,6 +1385,12 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, Quote> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
+    if (d.primaryExchange.present) {
+      context.handle(
+          _primaryExchangeMeta,
+          primaryExchange.isAcceptableValue(
+              d.primaryExchange.value, _primaryExchangeMeta));
+    }
     if (d.calculationPrice.present) {
       context.handle(
           _calculationPriceMeta,
@@ -1339,15 +1407,21 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, Quote> {
           latestSource.isAcceptableValue(
               d.latestSource.value, _latestSourceMeta));
     }
+    if (d.latestTime.present) {
+      context.handle(_latestTimeMeta,
+          latestTime.isAcceptableValue(d.latestTime.value, _latestTimeMeta));
+    }
+    if (d.latestUpdate.present) {
+      context.handle(
+          _latestUpdateMeta,
+          latestUpdate.isAcceptableValue(
+              d.latestUpdate.value, _latestUpdateMeta));
+    }
     if (d.latestVolume.present) {
       context.handle(
           _latestVolumeMeta,
           latestVolume.isAcceptableValue(
               d.latestVolume.value, _latestVolumeMeta));
-    }
-    if (d.latestTime.present) {
-      context.handle(_latestTimeMeta,
-          latestTime.isAcceptableValue(d.latestTime.value, _latestTimeMeta));
     }
     if (d.open.present) {
       context.handle(
@@ -1485,6 +1559,10 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, Quote> {
     if (d.name.present) {
       map['name'] = Variable<String, StringType>(d.name.value);
     }
+    if (d.primaryExchange.present) {
+      map['primary_exchange'] =
+          Variable<String, StringType>(d.primaryExchange.value);
+    }
     if (d.calculationPrice.present) {
       map['calculation_price'] =
           Variable<String, StringType>(d.calculationPrice.value);
@@ -1495,11 +1573,15 @@ class $QuotesTable extends Quotes with TableInfo<$QuotesTable, Quote> {
     if (d.latestSource.present) {
       map['latest_source'] = Variable<String, StringType>(d.latestSource.value);
     }
+    if (d.latestTime.present) {
+      map['latest_time'] = Variable<String, StringType>(d.latestTime.value);
+    }
+    if (d.latestUpdate.present) {
+      map['latest_update'] =
+          Variable<DateTime, DateTimeType>(d.latestUpdate.value);
+    }
     if (d.latestVolume.present) {
       map['latest_volume'] = Variable<int, IntType>(d.latestVolume.value);
-    }
-    if (d.latestTime.present) {
-      map['latest_time'] = Variable<DateTime, DateTimeType>(d.latestTime.value);
     }
     if (d.open.present) {
       map['open'] = Variable<double, RealType>(d.open.value);

@@ -6,9 +6,9 @@ part 'chart_dao.g.dart';
 
 @UseDao(tables: [Chart])
 class ChartDao extends DatabaseAccessor<AppDatabase> with _$ChartDaoMixin {
-  final AppDatabase db;
+  //final AppDatabase db;
 
-  ChartDao(this.db) : super(db);
+  ChartDao( AppDatabase db) : super(db);
 
   Future save(Insertable<ChartEntry> entry) => into(chart).insert(entry);
 

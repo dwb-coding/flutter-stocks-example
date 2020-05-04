@@ -6,9 +6,8 @@ part 'portfolio_dao.g.dart';
 
 @UseDao(tables: [Portfolio])
 class PortfolioDao extends DatabaseAccessor<AppDatabase> with _$PortfolioDaoMixin {
-  final AppDatabase db;
 
-  PortfolioDao(this.db) : super(db);
+  PortfolioDao(AppDatabase db) : super(db);
 
   Future add(Insertable<Stock> stock) => into(portfolio).insert(stock);
 

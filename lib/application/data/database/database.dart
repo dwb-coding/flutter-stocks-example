@@ -1,6 +1,3 @@
-import 'dart:math';
-
-import 'package:moor/moor.dart';
 import 'package:moor_flutter/moor_flutter.dart';
 import 'package:stocks/application/data/database/dao/company_dao.dart';
 import 'package:stocks/application/data/database/dao/quote_dao.dart';

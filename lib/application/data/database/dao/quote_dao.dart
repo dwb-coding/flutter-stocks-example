@@ -8,33 +8,42 @@ part 'quote_dao.g.dart';
 
 @UseDao(tables: [Quotes,Portfolio])
 class QuoteDao extends DatabaseAccessor<AppDatabase> with _$QuoteDaoMixin {
-  final AppDatabase db;
 
-  QuoteDao(this.db) : super(db);
+  QuoteDao(AppDatabase db) : super(db);
 
-  Future insertQuote(Insertable<Quote> stock) => db.into(quotes).insert(stock);
+  Future save(List<Quote> list) =>
+      transaction(() async {
+        list.forEach((quote) async {
+          await into(quotes).insert(quote, orReplace: true);
+        });
+      });
 
-  Future deleteQuote(Insertable<Quote> stock) =>
-      db.delete(quotes).delete(stock);
+  // join query returns List<TypeResult>.  need to map to appropriate tables
+  Stream<List<Quote>> watchPortfolioQuotes() =>
+      select(portfolio)
+          .join([leftOuterJoin(quotes, quotes.symbol.equalsExp(portfolio.symbol),useColumns: true),])
+          .watch()
+          .map((rows) => rows.map((row) => row.readTable(quotes)).toList());
 
   Stream<List<Quote>> watchAllQuotes() => db.select(quotes).watch();
 
 
-  Stream<List<StockWithQuote>> watchPortfolio() =>
-      select(portfolio)
-          .join(
-          [leftOuterJoin(quotes, quotes.symbol.equalsExp(portfolio.symbol)),])
-          .watch()
-          .map((rows) =>
-          rows.map((r) =>
-              StockWithQuote(
-                  stock: r.readTable(portfolio), quote: r.readTable(quotes))
-          ).toList());
-
 }
+//  Stream<List<Quote>> watchPortfolio() =>
+//      select(portfolio)
+//          .join(
+//          [leftOuterJoin(quotes, quotes.symbol.equalsExp(portfolio.symbol)),])
+//          .watch()
+//          .map((rows) =>
+//          rows.map((r) =>
+//              StockWithQuote(
+//                  stock: r.readTable(portfolio), quote: r.readTable(quotes))
+//          ).toList());
 
-class StockWithQuote {
-  final Stock stock;
-  final Quote quote;
-  StockWithQuote({@required this.stock, @required this.quote});
-}
+
+
+//class StockWithQuote {
+//  final Stock stock;
+//  final Quote quote;
+//  StockWithQuote({@required this.stock, @required this.quote});
+//}
