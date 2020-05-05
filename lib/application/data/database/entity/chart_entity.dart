@@ -1,6 +1,6 @@
 import 'package:moor_flutter/moor_flutter.dart';
 
-@DataClassName('ChartEntry')
+@DataClassName('DataPoint')
 class Chart extends Table {
   String get tableName => 'chart';
 

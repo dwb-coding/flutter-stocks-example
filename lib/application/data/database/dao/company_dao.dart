@@ -14,11 +14,9 @@ class CompanyDao extends DatabaseAccessor<AppDatabase> with _$CompanyDaoMixin {
   CompanyDao(AppDatabase db) : super(db);
 
   Future add(List<Company> list) =>
-      transaction(() async {
-        list.forEach((company) async {
-          await into(companies).insert(company);
-        });
-      });
+      transaction(() async => await Future.forEach(
+          list, (company) async => await into(companies).insert(company))
+      );
 
   // delete all companies
   Future removeAll() async => await delete(companies).go();

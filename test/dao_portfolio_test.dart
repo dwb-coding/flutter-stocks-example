@@ -19,19 +19,17 @@ void main() {
     test('add stocks to portfolio', () async {
       final dao = PortfolioDao(_db);
 
+      // add stocks to database
       final list = <Stock>[
         Stock(symbol: "AAPL", name: "APPLE INC", id: null),
         Stock(symbol: 'CTSO',name: "Cytosorb Inc", id: null),
         Stock(symbol: 'GOOG', name: "Alphabet Inc.", id: null),
         Stock(symbol: 'AAPT', name: "Autonomous Airline Pilot Testing", id: null),
       ];
-
-      // add stocks to database
       list.forEach((item) async => await dao.add(item));
 
       // query all stocks in database
       final portfolio = await dao.getPortfolio();
-
       expect(portfolio.length,4);
       expect(portfolio[0],list[0].copyWith(id: 1));
     });
@@ -92,7 +90,7 @@ void main() {
         emits(<String>[]),
       );
       await noStocksExpected;
-      
+
       final afterAddingStocks = [list[0].copyWith(id: 1), list[1].copyWith(id: 2),];
       final twoStocksExpected = expectLater(
         watcher,

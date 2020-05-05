@@ -2180,7 +2180,7 @@ class $CompaniesTable extends Companies
   }
 }
 
-class ChartEntry extends DataClass implements Insertable<ChartEntry> {
+class DataPoint extends DataClass implements Insertable<DataPoint> {
   final int id;
   final String symbol;
   final DateTime date;
@@ -2198,7 +2198,7 @@ class ChartEntry extends DataClass implements Insertable<ChartEntry> {
   final double changePercent;
   final String label;
   final double changeOverTime;
-  ChartEntry(
+  DataPoint(
       {@required this.id,
       @required this.symbol,
       @required this.date,
@@ -2216,14 +2216,14 @@ class ChartEntry extends DataClass implements Insertable<ChartEntry> {
       this.changePercent,
       @required this.label,
       this.changeOverTime});
-  factory ChartEntry.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+  factory DataPoint.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final stringType = db.typeSystem.forDartType<String>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final doubleType = db.typeSystem.forDartType<double>();
-    return ChartEntry(
+    return DataPoint(
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       symbol:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}symbol']),
@@ -2254,10 +2254,10 @@ class ChartEntry extends DataClass implements Insertable<ChartEntry> {
           .mapFromDatabaseResponse(data['${effectivePrefix}change_over_time']),
     );
   }
-  factory ChartEntry.fromJson(Map<String, dynamic> json,
+  factory DataPoint.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return ChartEntry(
+    return DataPoint(
       id: serializer.fromJson<int>(json['id']),
       symbol: serializer.fromJson<String>(json['symbol']),
       date: serializer.fromJson<DateTime>(json['date']),
@@ -2338,7 +2338,7 @@ class ChartEntry extends DataClass implements Insertable<ChartEntry> {
     );
   }
 
-  ChartEntry copyWith(
+  DataPoint copyWith(
           {int id,
           String symbol,
           DateTime date,
@@ -2356,7 +2356,7 @@ class ChartEntry extends DataClass implements Insertable<ChartEntry> {
           double changePercent,
           String label,
           double changeOverTime}) =>
-      ChartEntry(
+      DataPoint(
         id: id ?? this.id,
         symbol: symbol ?? this.symbol,
         date: date ?? this.date,
@@ -2377,7 +2377,7 @@ class ChartEntry extends DataClass implements Insertable<ChartEntry> {
       );
   @override
   String toString() {
-    return (StringBuffer('ChartEntry(')
+    return (StringBuffer('DataPoint(')
           ..write('id: $id, ')
           ..write('symbol: $symbol, ')
           ..write('date: $date, ')
@@ -2439,7 +2439,7 @@ class ChartEntry extends DataClass implements Insertable<ChartEntry> {
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is ChartEntry &&
+      (other is DataPoint &&
           other.id == this.id &&
           other.symbol == this.symbol &&
           other.date == this.date &&
@@ -2459,7 +2459,7 @@ class ChartEntry extends DataClass implements Insertable<ChartEntry> {
           other.changeOverTime == this.changeOverTime);
 }
 
-class ChartCompanion extends UpdateCompanion<ChartEntry> {
+class ChartCompanion extends UpdateCompanion<DataPoint> {
   final Value<int> id;
   final Value<String> symbol;
   final Value<DateTime> date;
@@ -2557,7 +2557,7 @@ class ChartCompanion extends UpdateCompanion<ChartEntry> {
   }
 }
 
-class $ChartTable extends Chart with TableInfo<$ChartTable, ChartEntry> {
+class $ChartTable extends Chart with TableInfo<$ChartTable, DataPoint> {
   final GeneratedDatabase _db;
   final String _alias;
   $ChartTable(this._db, [this._alias]);
@@ -2872,9 +2872,9 @@ class $ChartTable extends Chart with TableInfo<$ChartTable, ChartEntry> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ChartEntry map(Map<String, dynamic> data, {String tablePrefix}) {
+  DataPoint map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ChartEntry.fromData(data, _db, prefix: effectivePrefix);
+    return DataPoint.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
