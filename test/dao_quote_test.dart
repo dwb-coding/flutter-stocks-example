@@ -34,8 +34,6 @@ void main() {
     });
 
     test('watch quotes for portfolio',() async {
-      print('Creating portfolio watcher...');
-
       var emptyList = await _dao.select(_db.quotes).get();
       expect(emptyList.length, 0);
 
@@ -46,7 +44,6 @@ void main() {
         quote.copyWith(symbol: 'GOOG', name: "Alphabet Inc."),
         quote.copyWith(symbol: 'AAPT', name: "Autonomous Airline Pilot Testing",),
       ];
-      print('Saving list of quotes...');
       await _dao.save(list);
 
       var withQuotes = await _dao.select(_db.quotes).get();
