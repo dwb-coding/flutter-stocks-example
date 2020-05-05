@@ -11,7 +11,7 @@ class PortfolioDao extends DatabaseAccessor<AppDatabase> with _$PortfolioDaoMixi
 
   Future add(Insertable<Stock> stock) => into(portfolio).insert(stock);
 
-  Future remove(Insertable<Stock> stock) => delete(portfolio).delete(stock);
+  Future remove(String symbol) => (delete(portfolio)..where((stock) => stock.symbol.like(symbol))).go();
 
   Future<List<Stock>> getPortfolio() => select(portfolio).get();
 
